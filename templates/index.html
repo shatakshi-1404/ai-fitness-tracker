@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Fitness Trainer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <!-- Animated background grid -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <!-- ── TOP NAV ── -->
+  <header class="nav">
+    <div class="nav-brand">
+      <span class="brand-icon">⚡</span>
+      <span class="brand-name">FITAI</span>
+      <span class="brand-tag">TRAINER</span>
+    </div>
+    <div class="nav-status">
+      <span class="status-dot" id="statusDot"></span>
+      <span class="status-text" id="statusText">OFFLINE</span>
+    </div>
+    <div class="nav-fps">
+      <span class="fps-label">FPS</span>
+      <span class="fps-value" id="fpsDisplay">--</span>
+    </div>
+    <div class="session-timer">
+      <span class="timer-label">SESSION</span>
+      <span class="timer-value" id="sessionTimer">00:00</span>
+    </div>
+  </header>
+
+  <!-- ── MAIN LAYOUT ── -->
+  <main class="main-layout">
+
+    <!-- LEFT PANEL: Exercise selector + Stats -->
+    <aside class="left-panel">
+      <div class="panel-section">
+        <h3 class="section-label">EXERCISES</h3>
+        <div class="exercise-grid">
+          <button class="ex-btn active" data-ex="squat" onclick="selectExercise('squat', this)">
+            <span class="ex-icon">🦵</span>
+            <span class="ex-name">SQUATS</span>
+            <span class="ex-count" id="count-squat">0</span>
+          </button>
+          <button class="ex-btn" data-ex="pushup" onclick="selectExercise('pushup', this)">
+            <span class="ex-icon">💪</span>
+            <span class="ex-name">PUSH-UPS</span>
+            <span class="ex-count" id="count-pushup">0</span>
+          </button>
+          <button class="ex-btn" data-ex="curl" onclick="selectExercise('curl', this)">
+            <span class="ex-icon">🏋️</span>
+            <span class="ex-name">CURLS</span>
+            <span class="ex-count" id="count-curl">0</span>
+          </button>
+          <button class="ex-btn" data-ex="lunge" onclick="selectExercise('lunge', this)">
+            <span class="ex-icon">🏃</span>
+            <span class="ex-name">LUNGES</span>
+            <span class="ex-count" id="count-lunge">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Active exercise big counter -->
+      <div class="panel-section big-counter-section">
+        <h3 class="section-label">CURRENT REPS</h3>
+        <div class="big-counter">
+          <div class="counter-ring">
+            <span class="counter-num" id="bigCount">0</span>
+          </div>
+          <div class="counter-meta">
+            <div class="meta-row">
+              <span class="meta-label">STAGE</span>
+              <span class="meta-value stage-badge" id="stageDisplay">---</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">ANGLE</span>
+              <span class="meta-value angle-val" id="angleDisplay">0°</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="panel-section">
+        <h3 class="section-label">FEEDBACK</h3>
+        <div class="feedback-box" id="feedbackBox">
+          <span id="feedbackText">Start streaming to begin</span>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="panel-section">
+        <h3 class="section-label">CONTROLS</h3>
+        <div class="controls-col">
+          <button class="ctrl-btn primary" id="startBtn" onclick="startStream()">
+            <span>▶</span> START CAMERA
+          </button>
+          <button class="ctrl-btn danger" id="stopBtn" onclick="stopStream()" disabled>
+            <span>■</span> STOP
+          </button>
+          <button class="ctrl-btn secondary" onclick="resetCurrent()">
+            <span>↺</span> RESET CURRENT
+          </button>
+          <button class="ctrl-btn ghost" onclick="resetAll()">
+            <span>⚠</span> RESET ALL
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER: Video feed -->
+    <section class="video-section">
+      <div class="video-frame-wrapper">
+        <div class="video-corners">
+          <span class="corner tl"></span>
+          <span class="corner tr"></span>
+          <span class="corner bl"></span>
+          <span class="corner br"></span>
+        </div>
+        <div class="video-placeholder" id="videoPlaceholder">
+          <div class="placeholder-content">
+            <div class="placeholder-icon">📷</div>
+            <p>Camera feed will appear here</p>
+            <p class="placeholder-sub">Click <strong>START CAMERA</strong> to begin</p>
+          </div>
+        </div>
+        <img id="videoFeed" src="" alt="Video Feed" class="video-feed hidden" />
+        <div class="scan-line"></div>
+        <!-- Active exercise overlay on video -->
+        <div class="video-badge" id="videoBadge">
+          <span id="videoBadgeText">SQUAT MODE</span>
+        </div>
+      </div>
+
+      <!-- Mini progress bars below video -->
+      <div class="progress-strip">
+        <div class="prog-item">
+          <span class="prog-label">SQUATS</span>
+          <div class="prog-bar-wrap"><div class="prog-bar" id="prog-squat"></div></div>
+          <span class="prog-num" id="pnum-squat">0</span>
+        </div>
+        <div class="prog-item">
+          <span class="prog-label">PUSH-UPS</span>
+          <div class="prog-bar-wrap"><div class="prog-bar" id="prog-pushup"></div></div>
+          <span class="prog-num" id="pnum-pushup">0</span>
+        </div>
+        <div class="prog-item">
+          <span class="prog-label">CURLS</span>
+          <div class="prog-bar-wrap"><div class="prog-bar" id="prog-curl"></div></div>
+          <span class="prog-num" id="pnum-curl">0</span>
+        </div>
+        <div class="prog-item">
+          <span class="prog-label">LUNGES</span>
+          <div class="prog-bar-wrap"><div class="prog-bar" id="prog-lunge"></div></div>
+          <span class="prog-num" id="pnum-lunge">0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: Stats + Guide -->
+    <aside class="right-panel">
+
+      <!-- Total workout stats -->
+      <div class="panel-section">
+        <h3 class="section-label">SESSION STATS</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-val" id="totalReps">0</span>
+            <span class="stat-label">TOTAL REPS</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-val" id="totalExercises">0</span>
+            <span class="stat-label">EXERCISES</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-val" id="calBurn">0</span>
+            <span class="stat-label">~CALORIES</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-val" id="avgAngle">---</span>
+            <span class="stat-label">AVG ANGLE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rep history log -->
+      <div class="panel-section history-section">
+        <h3 class="section-label">REP LOG</h3>
+        <div class="history-list" id="historyList">
+          <p class="history-empty">No reps yet — start moving!</p>
+        </div>
+      </div>
+
+      <!-- Exercise guide -->
+      <div class="panel-section">
+        <h3 class="section-label">HOW TO</h3>
+        <div class="guide-card" id="guideCard">
+          <div class="guide-title" id="guideTitle">SQUATS</div>
+          <ul class="guide-steps" id="guideSteps">
+            <li>Stand with feet shoulder-width apart</li>
+            <li>Keep your back straight</li>
+            <li>Lower until knees reach ~90°</li>
+            <li>Drive through heels to stand</li>
+          </ul>
+          <div class="guide-angles" id="guideAngles">
+            <span class="angle-tip">↑ UP: angle &gt;160°</span>
+            <span class="angle-tip">↓ DOWN: angle &lt;90°</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ── TOAST NOTIFICATIONS ── -->
+  <div class="toast-stack" id="toastStack"></div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
