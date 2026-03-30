@@ -1,14 +1,13 @@
-```python
 import cv2
 import numpy as np
 from utils.angle_calculator import calculate_angle
 
-# ✅ MediaPipe Tasks API
+# MediaPipe Tasks API
 from mediapipe.tasks import python as mp_python
 from mediapipe.tasks.python import vision as mp_vision
 from mediapipe.tasks.python.vision import PoseLandmarker, PoseLandmarkerOptions
 
-# ✅ Correct Image import
+# Correct Image import
 from mediapipe import Image as MPImage
 from mediapipe import ImageFormat
 
@@ -58,7 +57,7 @@ class PoseDetector:
 
         options = PoseLandmarkerOptions(
             base_options=mp_python.BaseOptions(model_asset_path=model_path),
-            running_mode=mp_vision.RunningMode.VIDEO,  # ✅ better for real-time
+            running_mode=mp_vision.RunningMode.VIDEO,
             num_poses=1,
             min_pose_detection_confidence=0.6,
             min_pose_presence_confidence=0.6,
